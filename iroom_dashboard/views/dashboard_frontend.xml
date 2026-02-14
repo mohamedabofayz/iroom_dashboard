@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="dashboard_frontend_template" name="Dashboard Frontend Page">
+        <t t-call="website.layout">
+            <div id="wrap" class="iroom-dashboard" style="direction: rtl;">
+                <div class="container">
+                    <header>
+                        <h1>SmartHotel AI</h1>
+                        <p style="color: var(--gray);">نظام إدارة الإيرادات الذكي - Website Access</p>
+                    </header>
+
+                    <div id="input-view" class="fade-in">
+                        <h2 style="margin-bottom: 20px; color: var(--dark-blue);">📄 بيانات الفندق الأساسية</h2>
+                        <form id="hotelForm" onsubmit="return false;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>اسم الفندق</label>
+                                    <input type="text" id="hotelName" />
+                                </div>
+                                <div class="form-group">
+                                    <label>المنطقة / المحافظة</label>
+                                    <select id="provinceSelect">
+                                        <option value="" disabled="disabled" selected="selected">جاري تحميل المناطق...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>إجمالي الغرف</label>
+                                    <input type="number" id="totalRooms" />
+                                </div>
+                                <div class="form-group">
+                                    <label>غرف مطلة</label>
+                                    <input type="number" id="viewRooms" />
+                                </div>
+                                <div class="form-group">
+                                    <label>السعر الأساسي (ريال)</label>
+                                    <input type="number" id="basePrice" />
+                                </div>
+                                <div class="form-group">
+                                    <label>الإيجار السنوي</label>
+                                    <input type="number" id="annualRent" />
+                                </div>
+                                <div class="form-group">
+                                    <label>هامش الربح الحالي %</label>
+                                    <input type="number" id="currentProfitMargin" />
+                                </div>
+                            </div>
+
+                            <h3 style="margin: 20px 0 10px; font-size: 1rem; color: var(--dark-blue);">أنواع الغرف</h3>
+                            <div id="roomTypesContainer"></div>
+                            
+                            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                <button type="button" class="btn btn-success" id="addRoomBtn">+ إضافة نوع</button>
+                                <button type="submit" class="btn btn-primary" id="analyzeBtn" style="flex: 1;">تحليل البيانات وجلب أحداث المنطقة</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-view" class="hidden fade-in">
+                        <div class="tabs-nav fade-in">
+                            <button class="tab-btn active" onclick="switchTab('stats')" id="btn-stats">📊 الإحصائيات والتقويم</button>
+                            <button class="tab-btn" onclick="switchTab('strategies')" id="btn-strategies">📋 الاستراتيجيات المطبقة</button>
+                            <button onclick="location.reload()" class="btn-reset">↻ إعادة تعيين</button>
+                        </div>
+
+                        <div id="tab-stats" class="fade-in">
+                            <div class="glass-panel room-summary-panel" id="roomSummaryPanel">
+                                <h2>🏨 توزيع الغرف في الفندق</h2>
+                                <div class="room-types-grid" id="roomTypesSummary"></div>
+                            </div>
+
+                            <div id="resultsArea" class="hidden">
+                                <div class="dashboard-grid">
+                                    <div class="stat-card">
+                                        <div class="stat-label">الإيراد السنوي المتوقع</div>
+                                        <div class="stat-value" id="totalRevenueDisplay">0</div>
+                                        <div class="profit-badge" id="revBoostBadge"></div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">صافي الربح</div>
+                                        <div class="stat-value" style="color: var(--green);" id="netProfitDisplay">0</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">هامش الربح الجديد</div>
+                                        <div class="stat-value" id="newMarginDisplay">0%</div>
+                                        <div class="profit-badge" id="marginImprovement"></div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">معدل الإشغال السنوي</div>
+                                        <div class="stat-value" id="occupancyDisplay">0%</div>
+                                        <div class="stat-label" style="font-size:0.8rem; color:var(--orange)">محسن بواسطة Min Stay AI</div>
+                                    </div>
+                                </div>
+
+                                <div class="glass-panel" id="priceChartPanel" style="margin-top: 20px;">
+                                    <h2>📈 مؤشر حركة السعر</h2>
+                                    <div style="height: 300px; position: relative;">
+                                        <canvas id="priceMovementChart"></canvas>
+                                    </div>
+                                    <div class="chart-filters" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                                        <button class="filter-btn active" data-view="daily" onclick="updateChartView('daily')">📅 يومي</button>
+                                        <button class="filter-btn" data-view="monthly" onclick="updateChartView('monthly')">📊 شهري</button>
+                                    </div>
+                                </div>
+
+                                <div class="heatmap-legend">
+                                    <div class="legend-item"><div class="legend-color heat-very-high"></div><span class="legend-label">ذروة عالية جداً</span></div>
+                                    <div class="legend-item"><div class="legend-color heat-high"></div><span class="legend-label">ذروة عالية</span></div>
+                                    <div class="legend-item"><div class="legend-color heat-medium"></div><span class="legend-label">ذروة متوسطة</span></div>
+                                    <div class="legend-item"><div class="legend-color heat-neutral"></div><span class="legend-label">عادي</span></div>
+                                </div>
+
+                                <div style="text-align: left; margin: 20px 0;">
+                                    <button class="btn btn-success" id="exportBtn" onclick="exportExcel()" style="width: auto;">📥 تصدير Excel شامل</button>
+                                </div>
+
+                                <div class="month-grid" id="calendarGrid"></div>
+                            </div>
+                        </div>
+
+                        <div id="tab-strategies" class="hidden">
+                            <div id="strategiesFooter" class="glass-panel hidden">
+                                <h2>📊 الاستراتيجيات المطبقة</h2>
+                                <div class="strategies-container" id="strategiesContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-fab" onclick="openSettings()">⚙️</div>
+
+                    <div class="modal" id="settingsModal">
+                        <div class="modal-content">
+                            <div style="display:flex; justify-content:space-between;">
+                                <h2>⚙️ إعدادات الاستراتيجيات</h2>
+                                <button class="btn btn-danger" onclick="closeModal('settingsModal')">×</button>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                                <div class="settings-section">
+                                    <h3>1. استراتيجيات التسعير</h3>
+                                    <div class="switch-container">
+                                        <div><strong>الحجز المبكر</strong></div>
+                                        <label class="switch"><input type="checkbox" id="st_early" checked="checked"/><span class="slider"></span></label>
+                                    </div>
+                                    <div class="switch-container">
+                                        <div><strong>التسعير الديناميكي</strong></div>
+                                        <label class="switch"><input type="checkbox" id="st_dynamic" checked="checked"/><span class="slider"></span></label>
+                                    </div>
+                                    <div class="switch-container">
+                                        <div><strong>تسعير الأحداث</strong></div>
+                                        <label class="switch"><input type="checkbox" id="st_event" checked="checked"/><span class="slider"></span></label>
+                                    </div>
+                                </div>
+                                <div class="settings-section">
+                                    <h3>2. تعظيم الإيرادات</h3>
+                                    <div class="switch-container">
+                                        <div><strong>حزم الترقية</strong></div>
+                                        <label class="switch"><input type="checkbox" id="st_upsell" checked="checked"/><span class="slider"></span></label>
+                                    </div>
+                                    <div class="switch-container">
+                                        <div><strong>حزم الشركات</strong></div>
+                                        <label class="switch"><input type="checkbox" id="st_corp"/><span class="slider"></span></label>
+                                    </div>
+                                    <div class="switch-container">
+                                        <div><strong>الحد الأدنى للإقامة</strong></div>
+                                        <label class="switch"><input type="checkbox" id="st_minstay" checked="checked"/><span class="slider"></span></label>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="settings-section">
+                                <h3>3. مضاعفات المواسم</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>رمضان (%)</label>
+                                        <input type="number" id="mul_ramadan" value="250"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>العشر الأواخر (%)</label>
+                                        <input type="number" id="mul_last10" value="400"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>موسم الحج (%)</label>
+                                        <input type="number" id="mul_hajj" value="450"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>عطلة نهاية الأسبوع (%)</label>
+                                        <input type="number" id="mul_weekend" value="130"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="applySettings()">💾 حفظ وتطبيق</button>
+                        </div>
+                    </div>
+
+                    <div class="modal" id="detailsModal">
+                        <div class="modal-content">
+                            <div style="display:flex; justify-content:space-between;">
+                                <h3 id="detailsTitle"></h3>
+                                <button class="btn btn-danger" onclick="closeModal('detailsModal')">×</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="detailsTable">
+                                    <thead id="detailsHead"></thead>
+                                    <tbody id="detailsBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

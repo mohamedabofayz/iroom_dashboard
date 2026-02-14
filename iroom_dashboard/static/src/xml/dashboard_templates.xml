@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="iroom_dashboard.dashboard_backend_template" owl="1">
+        <div class="o_dashboard_container iroom-dashboard" style="height: 100%; overflow-y: auto; padding: 20px; background: #F0F4F8;">
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet"/>
+            
+            <t t-call="iroom_dashboard.dashboard_core_content"/>
+        </div>
+    </t>
+
+    <t t-name="iroom_dashboard.dashboard_core_content">
+        <div class="container">
+            <header>
+                <h1>SmartHotel AI</h1>
+                <p style="color: var(--gray);">نظام إدارة الإيرادات الذكي - Odoo Integrated</p>
+            </header>
+
+            <div id="input-view" class="fade-in">
+                <h2 style="margin-bottom: 20px; color: var(--dark-blue);">📄 بيانات الفندق الأساسية</h2>
+                <form id="hotelForm" onsubmit="return false;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>اسم الفندق</label>
+                            <input type="text" id="hotelName" />
+                        </div>
+                        <div class="form-group">
+                            <label>المنطقة / المحافظة</label>
+                            <select id="provinceSelect">
+                                <option value="" disabled="disabled" selected="selected">جاري تحميل المناطق...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>إجمالي الغرف</label>
+                            <input type="number" id="totalRooms" />
+                        </div>
+                        <div class="form-group">
+                            <label>غرف مطلة</label>
+                            <input type="number" id="viewRooms" />
+                        </div>
+                        <div class="form-group">
+                            <label>السعر الأساسي (ريال)</label>
+                            <input type="number" id="basePrice" />
+                        </div>
+                        <div class="form-group">
+                            <label>الإيجار السنوي</label>
+                            <input type="number" id="annualRent" />
+                        </div>
+                        <div class="form-group">
+                            <label>هامش الربح الحالي %</label>
+                            <input type="number" id="currentProfitMargin" />
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 20px 0 10px; font-size: 1rem; color: var(--dark-blue);">أنواع الغرف</h3>
+                    <div id="roomTypesContainer"></div>
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button type="button" class="btn btn-success" id="addRoomBtn">+ إضافة نوع</button>
+                        <button type="submit" class="btn btn-primary" id="analyzeBtn" style="flex: 1;">تحليل البيانات والمزامنة</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="results-view" class="hidden fade-in">
+                <div class="tabs-nav fade-in">
+                    <button class="tab-btn active" onclick="window.switchTab('stats')" id="btn-stats">📊 الإحصائيات</button>
+                    <button class="tab-btn" onclick="window.switchTab('strategies')" id="btn-strategies">⚙️ مكتبة الاستراتيجيات</button>
+                    <button onclick="location.reload()" class="btn-reset">↻ تحليل جديد</button>
+                </div>
+
+                <div id="tab-stats" class="fade-in">
+                    <div class="glass-panel room-summary-panel" id="roomSummaryPanel">
+                        <h2>🏨 توزيع الغرف في الفندق</h2>
+                        <div class="room-types-grid" id="roomTypesSummary"></div>
+                    </div>
+
+                    <div id="resultsArea" class="hidden">
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-label">الإيراد السنوي المتوقع</div>
+                                <div class="stat-value" id="totalRevenueDisplay">0</div>
+                                <div class="profit-badge" id="revBoostBadge"></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">صافي الربح</div>
+                                <div class="stat-value" style="color: var(--green);" id="netProfitDisplay">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">هامش الربح الجديد</div>
+                                <div class="stat-value" id="newMarginDisplay">0%</div>
+                                <div class="profit-badge" id="marginImprovement"></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">معدل الإشغال السنوي</div>
+                                <div class="stat-value" id="occupancyDisplay">0%</div>
+                                <div class="stat-label" style="font-size:0.8rem; color:var(--orange)">محسن بواسطة Min Stay AI</div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel" id="priceChartPanel" style="margin-top: 20px;">
+                            <h2>📈 مؤشر حركة السعر</h2>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="priceMovementChart"></canvas>
+                            </div>
+                            <div class="chart-filters" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                                <button class="filter-btn active" data-view="daily" onclick="window.updateChartView('daily')">📅 يومي</button>
+                                <button class="filter-btn" data-view="monthly" onclick="window.updateChartView('monthly')">📊 شهري</button>
+                            </div>
+                        </div>
+
+                        <div class="heatmap-legend">
+                            <div class="legend-item"><div class="legend-color heat-very-high"></div><span class="legend-label">ذروة عالية جداً</span></div>
+                            <div class="legend-item"><div class="legend-color heat-high"></div><span class="legend-label">ذروة عالية</span></div>
+                            <div class="legend-item"><div class="legend-color heat-medium"></div><span class="legend-label">ذروة متوسطة</span></div>
+                            <div class="legend-item"><div class="legend-color heat-neutral"></div><span class="legend-label">عادي</span></div>
+                        </div>
+
+                        <div style="text-align: left; margin: 20px 0;">
+                            <button class="btn btn-success" id="exportBtn" style="width: auto;">📥 تصدير Excel شامل</button>
+                        </div>
+
+                        <div class="month-grid" id="calendarGrid"></div>
+                    </div>
+                </div>
+
+                <div id="tab-strategies" class="hidden fade-in">
+                    <div class="glass-panel">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <div>
+                                <h2>🚀 مكتبة الاستراتيجيات الذكية</h2>
+                                <p style="color:var(--gray); margin-top:5px;">قم بتفعيل أو تعطيل الاستراتيجيات بناءً على توصيات النظام</p>
+                            </div>
+                            <button class="btn btn-primary" style="width:auto;" onclick="window.reCalculateStrategies()">♻️ إعادة حساب النتائج</button>
+                        </div>
+                        
+                        <div id="strategiesLibraryContainer">
+                            <div class="text-center p-4">جاري تحميل مكتبة الاستراتيجيات...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="detailsModal">
+            <div class="modal-content">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3 id="detailsTitle"></h3>
+                    <button class="btn btn-danger" onclick="window.closeModal('detailsModal')">×</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="detailsTable">
+                        <thead id="detailsHead"></thead>
+                        <tbody id="detailsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Action for Backend -->
+    <record id="action_dashboard_backend" model="ir.actions.client">
+        <field name="name">SmartHotel AI Dashboard</field>
+        <field name="tag">iroom_dashboard.backend</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_dashboard_root"
+              name="SmartHotel AI"
+              sequence="5"/>
+    
+    <menuitem id="menu_dashboard_main"
+              name="Dashboard"
+              parent="menu_dashboard_root"
+              action="action_dashboard_backend"
+              sequence="1"/>
+
+    <!-- OWL Component Template for Backend -->
+    <template id="dashboard_backend_website_template" name="Dashboard Backend Template">
+        <div class="o_dashboard_view">
+            <!-- Load external dependencies -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet"/>
+            
+            <!-- Dashboard Core Content -->
+            <t t-call="iroom_dashboard.dashboard_core_content"/>
+        </div>
+    </template>
+</odoo>

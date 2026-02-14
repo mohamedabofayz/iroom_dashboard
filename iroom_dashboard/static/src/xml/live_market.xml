@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="iroom_dashboard.live_market_template" owl="1">
+        <div class="o_dashboard_container iroom-market-pro-wrapper" style="height: 100%; overflow-y: auto; background-color: #f5f7fa; direction: ltr;">
+            
+            <div id="wrap" class="oe_structure oe_empty">
+                
+                <section class="s_text_block pt0 pb0" data-name="iRoom Dashboard" style="background-color: #f5f7fa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+                    
+                    <style><![CDATA[
+                        /* --- نظام الألوان والمتغيرات (Design System Variables) --- */
+                        .iroom-market-pro-wrapper {
+                            --primary-green: #10b981;
+                            --primary-green-dark: #059669;
+                            --bg-light: #f5f7fa;
+                            --card-bg: #ffffff;
+                            --border-color: #e5e7eb;
+                            --text-muted: #6b7280;
+                            --text-dark: #1f2937;
+                            --danger: #ef4444;
+                            --warning: #f59e0b;
+                            --success-light: #d1fae5;
+                            --blue-boost: #3b82f6;
+                        }
+                        
+                        /* تخصيص البطاقات (Dashboard Cards) */
+                        .iroom-market-pro-wrapper .dashboard-card {
+                            background: var(--card-bg);
+                            border-radius: 16px;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                            border: 1px solid var(--border-color);
+                            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        }
+                        .iroom-market-pro-wrapper .dashboard-card:hover {
+                            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                            transform: translateY(-2px);
+                        }
+
+                        /* --- قسم الترويسة (Header Section) --- */
+                        .iroom-market-pro-wrapper .dashboard-header {
+                            background: white;
+                            border-bottom: 1px solid var(--border-color);
+                            padding: 16px 24px;
+                            position: sticky;
+                            top: 0;
+                            z-index: 100;
+                        }
+                        .iroom-market-pro-wrapper .logo-text { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+                        .iroom-market-pro-wrapper .logo-green { color: var(--primary-green); }
+                        .iroom-market-pro-wrapper .logo-gray { color: #9ca3af; font-weight: 300; }
+
+                        /* شارات الحالة (Mode Badges) */
+                        .iroom-market-pro-wrapper .mode-badge {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 10px;
+                            background: #f3f4f6;
+                            border-radius: 99px;
+                            padding: 10px 20px;
+                            font-size: 0.9rem;
+                            color: var(--text-dark);
+                            font-weight: 500;
+                            border: 1px solid var(--border-color);
+                        }
+                        .iroom-market-pro-wrapper .mode-badge i { color: var(--primary-green); animation: pulse 2s infinite; }
+
+                        /* --- شريط الإحصائيات (Stats Bar) --- */
+                        .iroom-market-pro-wrapper .stats-bar {
+                            background: white;
+                            border-bottom: 1px solid var(--border-color);
+                            padding: 20px 24px;
+                        }
+                        .iroom-market-pro-wrapper .stat-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            padding: 0 15px;
+                            border-right: 1px solid var(--border-color);
+                        }
+                        .iroom-market-pro-wrapper .stat-item:last-child { border-right: none; }
+                        .iroom-market-pro-wrapper .stat-label { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+                        .iroom-market-pro-wrapper .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); }
+                        .iroom-market-pro-wrapper .stat-value.green { color: var(--primary-green); }
+
+                        /* --- هيكل المبنى (3D Building Visualization) --- */
+                        .iroom-market-pro-wrapper .building-container {
+                            position: relative;
+                            background: linear-gradient(180deg, #eef2f3 0%, #dae2e4 100%);
+                            border-radius: 20px;
+                            padding: 40px 20px 20px 20px;
+                            min-height: 600px;
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                        }
+                        .iroom-market-pro-wrapper .building-structure {
+                            display: flex;
+                            flex-direction: column; /* الترتيب سيتم التحكم به عبر مصفوفة البيانات */
+                            gap: 6px;
+                            max-width: 500px;
+                            margin: 0 auto;
+                        }
+                        .iroom-market-pro-wrapper .floor-row { display: flex; align-items: center; gap: 12px; }
+                        .iroom-market-pro-wrapper .floor-label {
+                            width: 65px;
+                            font-size: 0.75rem;
+                            color: var(--primary-green-dark);
+                            font-weight: 700;
+                            text-align: right;
+                            background: rgba(16, 185, 129, 0.1);
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                        }
+                        .iroom-market-pro-wrapper .floor-rooms {
+                            display: flex;
+                            gap: 6px;
+                            background: rgba(255, 255, 255, 0.8);
+                            padding: 8px;
+                            border-radius: 10px;
+                            flex: 1;
+                            border: 1px solid rgba(255,255,255,0.5);
+                            backdrop-filter: blur(4px);
+                        }
+                        .iroom-market-pro-wrapper .room-cell {
+                            flex: 1;
+                            text-align: center;
+                            padding: 10px 2px;
+                            font-size: 0.75rem;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            min-width: 45px;
+                            transition: all 0.2s;
+                            cursor: pointer;
+                        }
+                        .iroom-market-pro-wrapper .room-cell:hover { transform: scale(1.05); filter: brightness(0.9); }
+                        .iroom-market-pro-wrapper .room-cell.empty { background: #f3f4f6; color: #9ca3af; border: 1px dashed #d1d5db; }
+                        .iroom-market-pro-wrapper .room-cell.active { background: #dcfce7; color: #166534; box-shadow: 0 2px 4px rgba(22, 101, 52, 0.1); }
+                        .iroom-market-pro-wrapper .room-cell.warning { background: #fef3c7; color: #92400e; }
+                        .iroom-market-pro-wrapper .room-cell.danger { background: #fee2e2; color: #991b1b; }
+                        .iroom-market-pro-wrapper .room-cell.boosted { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+
+                        /* --- عداد الأداء (Performance Gauge) --- */
+                        .iroom-market-pro-wrapper .gauge-container {
+                            position: absolute;
+                            top: 25px;
+                            right: 25px;
+                            width: 120px;
+                            height: 120px;
+                            z-index: 5;
+                        }
+                        .iroom-market-pro-wrapper .gauge-bg {
+                            width: 100%; height: 100%; border-radius: 50%;
+                            background: conic-gradient(from 180deg, #ef4444 0deg, #f59e0b 90deg, #10b981 180deg);
+                            position: relative;
+                            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                        }
+                        .iroom-market-pro-wrapper .gauge-inner {
+                            position: absolute; inset: 15%; background: white; border-radius: 50%;
+                            display: flex; flex-direction: column; align-items: center; justify-content: center;
+                        }
+                        .iroom-market-pro-wrapper .gauge-needle {
+                            position: absolute; bottom: 50%; left: 50%; width: 3px; height: 40%;
+                            background: #1f2937; transform-origin: bottom center;
+                            border-radius: 10px; transition: transform 1s ease-out;
+                        }
+
+                        /* --- الرسوم البيانية للشمعات (Candlestick Sparklines) --- */
+                        .iroom-market-pro-wrapper .candlestick-container {
+                            height: 70px;
+                            display: flex;
+                            align-items: flex-end;
+                            gap: 5px;
+                            padding: 10px 0;
+                        }
+                        .iroom-market-pro-wrapper .candle {
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: flex-end;
+                        }
+                        .iroom-market-pro-wrapper .candle-wick { width: 1px; height: 10px; background: #9ca3af; }
+                        .iroom-market-pro-wrapper .candle-body { width: 8px; border-radius: 2px; }
+                        .iroom-market-pro-wrapper .candle.up .candle-body { background: var(--primary-green); }
+                        .iroom-market-pro-wrapper .candle.down .candle-body { background: var(--danger); }
+
+                        /* --- قائمة الأحداث والإجراءات (Action Feed) --- */
+                        .iroom-market-pro-wrapper .timeline-item {
+                            display: flex;
+                            gap: 15px;
+                            padding: 15px 0;
+                            border-bottom: 1px solid var(--border-color);
+                        }
+                        .iroom-market-pro-wrapper .timeline-time { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; min-width: 45px; }
+                        .iroom-market-pro-wrapper .timeline-content { flex: 1; }
+                        .iroom-market-pro-wrapper .timeline-room { font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+                        .iroom-market-pro-wrapper .timeline-action { font-size: 0.85rem; color: var(--text-muted); }
+
+                        /* تخصيص مؤشرات الغرف (Metric Cards) */
+                        .iroom-market-pro-wrapper .room-card { padding: 20px; position: relative; overflow: hidden; }
+                        .iroom-market-pro-wrapper .sparkline-path { fill: none; stroke-width: 2; stroke-linecap: round; }
+                        
+                        @keyframes pulse {
+                            0% { opacity: 1; }
+                            50% { opacity: 0.5; }
+                            100% { opacity: 1; }
+                        }
+                    ]]></style>
+
+                    <div class="iroom-dashboard">
+                        
+                        <div class="dashboard-header d-flex justify-content-between align-items-center">
+                            <div class="logo-text">
+                                <span class="logo-green">iRoom</span>
+                                <span class="logo-gray">Live Market Pro</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="mode-badge">
+                                    <i class="fa fa-bolt"/>
+                                    <span>Aggressive Selling Mode</span>
+                                    <i class="fa fa-chevron-down" style="font-size: 0.7rem;"/>
+                                </div>
+                                <button class="btn-save" type="button">
+                                    SAVE &amp; EXECUTE <i class="fa fa-power-off ms-2"/>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="stats-bar">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-item">
+                                    <i class="fa fa-building-o" style="color: var(--primary-green); font-size: 1.2rem;"/>
+                                    <div>
+                                        <div class="stat-label">Active Rooms</div>
+                                        <div class="stat-value green">88 / 100 <span style="font-size: 0.8rem; font-weight: 400;">(88%)</span></div>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fa fa-money" style="color: var(--blue-boost); font-size: 1.2rem;"/>
+                                    <div>
+                                        <div class="stat-label">Current ADR</div>
+                                        <div class="stat-value">930 <span style="font-size: 0.8rem;">SAR</span></div>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fa fa-line-chart" style="color: var(--primary-green); font-size: 1.2rem;"/>
+                                    <div>
+                                        <div class="stat-label">Net Profit (Today)</div>
+                                        <div class="stat-value green">+19,000 <span style="font-size: 0.8rem;">SAR</span></div>
+                                    </div>
+                                </div>
+                                <div class="ms-auto d-flex gap-3">
+                                    <div class="icon-circle"><i class="fa fa-search"/></div>
+                                    <div class="icon-circle"><i class="fa fa-cog"/></div>
+                                    <div class="icon-circle"><i class="fa fa-expand"/></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container-fluid p-4">
+                            <div class="row g-4">
+                                
+                                <div class="col-lg-8">
+                                    <div class="dashboard-card overflow-hidden" style="min-height: 650px;">
+                                        <div class="building-container">
+                                            <div class="building-bg"/>
+                                            
+                                            <div class="gauge-container">
+                                                <div class="gauge-bg">
+                                                    <div class="gauge-needle" style="transform: translateX(-50%) rotate(55deg);"/>
+                                                    <div class="gauge-inner">
+                                                        <span style="font-size: 0.6rem; color: var(--text-muted); font-weight: 700;">STRATEGY</span>
+                                                        <span style="font-size: 0.9rem; font-weight: 800; color: var(--primary-green);">AGGR.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="building-structure">
+                                                <t t-foreach="[10, 9, 8, 7, 6, 5, 4, 3, 2, 1]" t-as="floor" t-key="floor">
+                                                    <div class="floor-row">
+                                                        <span class="floor-label">FLOOR <t t-esc="floor"/></span>
+                                                        <div class="floor-rooms">
+                                                            <div class="room-cell active">10<t t-esc="floor"/></div>
+                                                            <div t-attf-class="room-cell #{floor % 2 == 0 ? 'active' : 'empty'}">20<t t-esc="floor"/></div>
+                                                            <div t-attf-class="room-cell #{floor == 6 ? 'danger' : 'active'}">30<t t-esc="floor"/></div>
+                                                            <div t-attf-class="room-cell #{floor == 3 ? 'boosted' : 'active'}">40<t t-esc="floor"/></div>
+                                                            <div class="room-cell empty">50<t t-esc="floor"/></div>
+                                                            <div class="room-cell active">60<t t-esc="floor"/></div>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+
+                                            <div class="d-flex justify-content-around mt-5 p-3 bg-white border rounded-pill shadow-sm mx-4">
+                                                <div style="font-size: 0.85rem;"><i class="fa fa-refresh me-2 text-muted"/> <strong>81%</strong> Occupation</div>
+                                                <div style="font-size: 0.85rem;"><i class="fa fa-calendar me-2 text-muted"/> <strong>Saturday</strong> 80% Rev.</div>
+                                                <div style="font-size: 0.85rem;"><i class="fa fa-eye me-2 text-muted"/> <strong>963</strong> PMS Sync</div>
+                                                <div style="font-size: 0.85rem; color: var(--primary-green);"><i class="fa fa-line-chart me-2"/> <strong>+41%</strong> Yield</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    
+                                    <div class="dashboard-card p-4 mb-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h6 class="m-0 fw-bold">Live Demand Radar</h6>
+                                            <span class="badge bg-success rounded-pill" style="padding: 6px 12px;">64%</span>
+                                        </div>
+                                        <div class="radar-container text-center">
+                                            <svg viewbox="0 0 140 140" width="140" height="140">
+                                                <circle cx="70" cy="70" r="60" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                                                <circle cx="70" cy="70" r="40" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                                                <circle cx="70" cy="70" r="20" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                                                <line x1="70" y1="10" x2="70" y2="130" stroke="#e5e7eb" stroke-width="1"/>
+                                                <line x1="10" y1="70" x2="130" y2="70" stroke="#e5e7eb" stroke-width="1"/>
+                                                <polygon points="70,25 110,50 115,80 90,110 70,115 40,100 25,70 45,40" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" stroke-width="2"/>
+                                                <circle cx="70" cy="25" r="3" fill="#10b981"/>
+                                            </svg>
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-4">
+                                            <span class="text-success fw-bold small"><i class="fa fa-play me-1"/> ACTIVE SIGNAL</span>
+                                            <span class="text-success fw-bold small">+12.5% <i class="fa fa-arrow-up"/></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="dashboard-card p-4 mb-4">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <small class="text-muted fw-bold">PROFIT CHANGE (H)</small>
+                                            <i class="fa fa-ellipsis-h text-muted"/>
+                                        </div>
+                                        <div class="h3 fw-bold text-success mb-3">+10.2%</div>
+                                        <div class="candlestick-container">
+                                            <div class="candle down"><div class="candle-wick"/><div class="candle-body" style="height: 25px;"/></div>
+                                            <div class="candle up"><div class="candle-wick"/><div class="candle-body" style="height: 45px;"/></div>
+                                            <div class="candle up"><div class="candle-wick"/><div class="candle-body" style="height: 55px;"/></div>
+                                            <div class="candle down"><div class="candle-wick"/><div class="candle-body" style="height: 15px;"/></div>
+                                            <div class="candle up"><div class="candle-wick"/><div class="candle-body" style="height: 40px;"/></div>
+                                            <div class="candle up"><div class="candle-wick"/><div class="candle-body" style="height: 50px;"/></div>
+                                            <div class="candle down"><div class="candle-wick"/><div class="candle-body" style="height: 20px;"/></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="dashboard-card p-4" style="max-height: 235px; overflow: hidden;">
+                                        <h6 class="fw-bold mb-3"><i class="fa fa-bolt text-warning me-2"/>Action Feed</h6>
+                                        <div class="timeline-item">
+                                            <span class="timeline-time">08:45</span>
+                                            <div class="timeline-content">
+                                                <div class="timeline-room">RM-204 Standard <span class="text-success ms-2">+15%</span></div>
+                                                <div class="timeline-action text-truncate">Price surge triggered by competitor sell-out</div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <span class="timeline-time">08:32</span>
+                                            <div class="timeline-content">
+                                                <div class="timeline-room">RM-410 Business</div>
+                                                <div class="timeline-action text-truncate">Auto-locked for maintenance block</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="row mt-4 mb-3 align-items-center">
+                                <div class="col">
+                                    <h5 class="m-0 fw-bold text-dark">RoomLive <span class="fw-light text-muted">Metrics:</span></h5>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="filter-tabs">
+                                        <button class="filter-tab active">All Rooms</button>
+                                        <button class="filter-tab">Suites Only</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+                                
+                                <div class="col">
+                                    <div class="dashboard-card room-card">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <div class="fw-bold text-dark">RM-110 <span class="text-muted small fw-normal">Standard</span></div>
+                                                <div class="small text-success mt-1"><i class="fa fa-bolt me-1"/> BOOSTING PRICE</div>
+                                            </div>
+                                            <span class="badge bg-success-light text-success border-0 px-2 py-1" style="font-size: 0.65rem;">OCCUPIED</span>
+                                        </div>
+                                        <div class="fw-bold h5 mb-2">880 <span class="small text-muted">SAR</span> <i class="fa fa-arrow-up text-success small ms-1"/></div>
+                                        <div style="height: 40px; width: 100%;">
+                                            <svg width="100%" height="100%" viewbox="0 0 200 40">
+                                                <path d="M0,35 Q30,35 50,20 T100,25 T150,10 T200,15" class="sparkline-path" stroke="#10b981" fill="none"/>
+                                            </svg>
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-3 pt-2 border-top border-light">
+                                            <small class="text-muted"><i class="fa fa-clock-o me-1"/> 5min ago</small>
+                                            <small class="text-dark fw-bold">YIELD: 22%</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <div class="dashboard-card room-card">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <div class="fw-bold text-dark">RM-101 <span class="text-muted small fw-normal">Business</span></div>
+                                                <div class="small text-primary mt-1"><i class="fa fa-rocket me-1"/> AGGRESSIVE UPSALE</div>
+                                            </div>
+                                            <span class="badge bg-primary text-white border-0 px-2 py-1" style="font-size: 0.65rem; background-color: #3b82f6 !important;">BOOSTING</span>
+                                        </div>
+                                        <div class="fw-bold h5 mb-2">1,200 <span class="small text-muted">SAR</span> <span class="text-primary small ms-1">+50%</span></div>
+                                        <div style="height: 40px; width: 100%;">
+                                            <svg width="100%" height="100%" viewbox="0 0 200 40">
+                                                <path d="M0,30 L20,30 L40,10 L60,25 L80,5 L100,20 L120,8 L140,15 L160,5 L180,25 L200,10" class="sparkline-path" stroke="#3b82f6" fill="none"/>
+                                            </svg>
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-3 pt-2 border-top border-light">
+                                            <small class="text-muted"><i class="fa fa-clock-o me-1"/> 12min ago</small>
+                                            <small class="text-dark fw-bold">MAX YIELD</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <div class="dashboard-card room-card">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <div class="fw-bold text-dark">RM-204 <span class="text-muted small fw-normal">Standard</span></div>
+                                                <div class="small text-warning mt-1"><i class="fa fa-exchange me-1"/> NEGOTIATING PRICE</div>
+                                            </div>
+                                            <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 0.65rem;">WAITING</span>
+                                        </div>
+                                        <div class="fw-bold h5 mb-2">650 <span class="small text-muted">SAR</span> <span class="text-muted small ms-1">(Target: 700)</span></div>
+                                        <div class="mt-4 mb-2">
+                                            <div style="height: 6px; background: #e5e7eb; border-radius: 10px; overflow: hidden;">
+                                                <div style="width: 65%; height: 100%; background: var(--warning); border-radius: 10px;"/>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-3 pt-2 border-top border-light">
+                                            <small class="text-muted"><i class="fa fa-clock-o me-1"/> 1min ago</small>
+                                            <small class="text-warning fw-bold">PROBABILITY: 65%</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="dashboard-card p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h6 class="m-0 fw-bold text-dark"><i class="fa fa-list-ul me-2"/>System-Wide Action Feed</h6>
+                                            <span class="badge bg-light text-dark border px-3 py-2">Total: 18 today</span>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="p-3 mb-2 rounded shadow-sm border-start border-4" style="border-left-color: var(--primary-green) !important; background: #fafafa;">
+                                                    <div class="d-flex justify-content-between mb-1">
+                                                        <span class="fw-bold small">PRICE SURGE EXECUTED</span>
+                                                        <small class="text-muted">08:55 AM</small>
+                                                    </div>
+                                                    <div class="small text-muted">RM-204 price increased by 10% based on demand signal DS-402.</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="p-3 mb-2 rounded shadow-sm border-start border-4" style="border-left-color: var(--warning) !important; background: #fafafa;">
+                                                    <div class="d-flex justify-content-between mb-1">
+                                                        <span class="fw-bold small">MANUAL OVERRIDE DETECTED</span>
+                                                        <small class="text-muted">08:51 AM</small>
+                                                    </div>
+                                                    <div class="small text-muted">RM-305 AI Mode frozen for 2h due to front-desk manual pricing.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_clean_market" model="ir.actions.client">
+            <field name="name">iRoom Live Market Pro</field>
+            <field name="tag">iroom_dashboard.live_market</field>
+        </record>
+
+        <menuitem id="menu_clean_market"
+                  name="Live Market"
+                  parent="menu_dashboard_root"
+                  action="action_clean_market"
+                  sequence="10"/>
+    </data>
+</odoo>
